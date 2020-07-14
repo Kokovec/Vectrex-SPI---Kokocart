@@ -24,8 +24,8 @@ Procedure to load a ROM (up to 64K) onto the Adapter:
 The app will then transfer the ROM over to the Vectrex. 
 To load a new ROM file without turning off the Vectrex you can do one of two things: 
 * Hit the reset button on the app UI
-* Press and hold the the Vectrex reset button for 2 seconds.   
-In both cases the Vectrex will reboot to Minestorm but resetting the Vectrex (again) will kick off the loaded ROM. 
+* Press and hold the the Vectrex reset button for 2 seconds. In both cases the Vectrex will reboot to Minestorm but resetting the Vectrex (again) will kick off the loaded ROM.  
+
 To load a new ROM file after the Vectrex has been turned off while the USB cable is still connected to the Adapter:
 * Reset the Adapter by unplugging and re-plugging the USB connector 
 * Restart the PC app and refer back to the original ROM loading procedure above 
