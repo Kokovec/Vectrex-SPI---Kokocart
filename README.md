@@ -10,4 +10,3 @@ Within this repo you'll find:
 * Pycharm project (Python app)
 * Various project docs (pictures, signal captures, etc)  
 A video of the adapter in action can be found here: 
-
