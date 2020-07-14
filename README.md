@@ -1,7 +1,7 @@
 # Vectrex-SPI---Kokocart
 A Synchronous Serial Interface for the Vectrex
 
-These files contain the source code and Gerber files required to produce the Vectrex SPI adapter that appeared in Vectorbolt issue #9 (http://geovector.tripod.com/_sgg/m3_1.htm).   
+These files contain the source code and Gerber files required to produce the Vectrex SPI Adapter that appeared in Vectorbolt issue #9 (http://geovector.tripod.com/_sgg/m3_1.htm).   
  
 Within this repo you'll find:
 * PSOC 3 Creator project (microcontroller code)
@@ -13,7 +13,7 @@ Within this repo you'll find:
 A video of the adapter in action can be found here: 
  
 Procedure to load a ROM (up to 64K) onto the Adapter: 
-* Plug adapter into the Vectrex
+* Plug Adapter into the Vectrex
 * Connect USB cable from PC to Adapter
 * Turn on Vectrex
 * Run the Python app
