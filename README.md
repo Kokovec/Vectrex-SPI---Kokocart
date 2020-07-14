@@ -36,6 +36,7 @@ To run the demo:
 * The screen will show "WAITING".
 * Turn on the C64 and load the disk file
 * Type in SYS 49152 and hit the return key  
+
 Now you should be able to move the Vectrex and C64 joysticks around to control the ships on screen.  
 
 
