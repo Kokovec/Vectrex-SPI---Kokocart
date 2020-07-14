@@ -18,6 +18,7 @@ Procedure to load a ROM (up to 64K) onto the Adapter:
 * Turn on Vectrex
 * Run the Python app
 * Within Python app:
- * Choose com port
- * Choose ROM file  
+  * Choose com port
+  * Choose ROM file 
+
 The app will then transfer the ROM over to the Vectrex.
