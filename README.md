@@ -8,6 +8,16 @@ Within this repo you'll find:
 * VIDE project (Vectrex code)
 * C64Studio project (C64 code)
 * Gerber files (PCB)
-* Pycharm project (Python app)
-* Various project docs (pictures, signal captures, etc)  
+* Pycharm project (Python ROM loadder app)
+* Various project docs (pictures, signal captures, etc) 
 A video of the adapter in action can be found here: 
+ 
+Procedure to load a ROM (up to 64K) onto the Adapter: 
+* Plug adapter into the Vectrex
+* Connect USB cable from PC to Adapter
+* Turn on Vectrex
+* Run the Python app
+* Within Python app:
+** Choose com port
+** Choose ROM file 
+The app will then transfer the ROM over to the Vectrex.
