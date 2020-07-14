@@ -8,4 +8,6 @@ Within this repo you'll find:
 * C64Studio project (C64 code)
 * Gerber files (PCB)
 * Pycharm project (Python app)
+* Various project docs (pictures, signal captures, etc)
+A video of the adapter in action can be found here: 
 
