@@ -21,6 +21,8 @@ Procedure to load a ROM (up to 64K) onto the Adapter:
   * Choose com port
   * Choose ROM file 
 
-The app will then transfer the ROM over to the Vectrex.
+The app will then transfer the ROM over to the Vectrex. 
 To load a new ROM file without turning off the Vectrex you can do one of two things: 
-* 
+* Hit the reset button on the app UI
+* Press and hold the the Vectrex reset button for 2 seconds 
+In both cases the Vectrex will reboot in Minestorm but resetting the Vectrex (again) will kick off the loaded ROM.
