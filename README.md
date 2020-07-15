@@ -21,7 +21,8 @@ Procedure to load a ROM (up to 64K) onto the Adapter:
   * Choose COM port
   * Choose ROM file 
 
-The app will then transfer the ROM over to the Vectrex. 
+The app will then transfer the ROM over to the Vectrex.  
+
 To load a new ROM file without turning off the Vectrex you can:  
 * Press and hold the the Vectrex reset button for 2 seconds
 * The Vectrex will halt and the PC app will allow you to choose a new file
