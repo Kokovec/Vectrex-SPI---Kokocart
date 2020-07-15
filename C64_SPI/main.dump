@@ -1,0 +1,305 @@
+000   ----              ;compile to this filename
+001   ----              !to "jmain.prg",cbm
+002   ----              
+003   ----              ;define constants here
+004   ----              
+005   ----              PORT_B_DATA     = 56577
+006   ----              PORT_B_DDR      = 56579
+007   ----              Sprite_Enable   = 53269
+008   ----              Sprite_Pos_Base = 53248
+009   ----              
+010   ----              Counter1      = $fb
+011   ----              Counter2      = $fc
+012   ----              Counter3      = $fd
+013   ----              Counter4      = $fe
+014   ----              RX_Buffer     = 248
+015   ----              ScreenLSB     = 249
+016   ----              ScreenMSB     = 250
+017   ----              ShipPos_X     = $61
+018   ----              ShipPos_X_MSB = $62
+019   ----              ShipPos_Y     = $63
+020   ----              Sprite_State  = $64             ;
+021   ----              
+022   ----              
+023  $C000              *=$C000
+024  $C000              
+025  $C000              Program_Start
+026  $C000  20 6A C0    jsr Setup_PortB                 ;Set up Port B
+027  $C003  20 AC C0    jsr Clear_Screen                ;Set up screen
+028  $C006  20 D5 C0    jsr Initialize_Sprites          ;Set up Sprites
+029  $C009              
+030  $C009              ;Set Sprite pointer locations in memory (Sprite start=$2000)
+031  $C009  A2 80       ldx #$80                        ;80*40 = 2000  (Sprite 0)
+032  $C00B  8E F8 07    stx $07f8
+033  $C00E  E8          inx                             ;80*41 = 2080  (Sprite 1)
+034  $C00F  8E F9 07    stx $07f9
+035  $C012  E8          inx
+036  $C013  8E FA 07    stx $07fa
+037  $C016  E8          inx
+038  $C017  8E FB 07    stx $07fb
+039  $C01A              ;Set Sprite to center screen and turn on
+040  $C01A  A9 5A       lda #90
+041  $C01C  85 63       sta ShipPos_Y
+042  $C01E  8D 01 D0    sta Sprite_Pos_Base+1
+043  $C021  A9 A0       lda #160
+044  $C023  85 61       sta ShipPos_X
+045  $C025  8D 00 D0    sta Sprite_Pos_Base
+046  $C028  A2 00       ldx #0
+047  $C02A  86 62       stx ShipPos_X_MSB
+048  $C02C  8E 10 D0    stx Sprite_Pos_Base+16
+049  $C02F  86 64       stx Sprite_State
+050  $C031  E8          inx                             ;Turn on Sprite 0
+051  $C032  8E 15 D0    stx Sprite_Enable
+052  $C035              
+053  $C035              
+054  $C035              
+055  $C035  A9 04       lda #04                         ;Set screen pointer to top left
+056  $C037  85 FA       sta ScreenMSB
+057  $C039  A9 00       lda #$00
+058  $C03B  85 F9       sta ScreenLSB
+059  $C03D  A9 00       lda #00
+060  $C03F  85 FD       sta Counter3
+061  $C041              Program_Loop
+062  $C041  A2 01       ldx #1
+063  $C043  86 FB       stx Counter1
+064  $C045  A2 FF       ldx #$ff
+065  $C047  86 FC       stx Counter2
+066  $C049              Delay_Loop_Start
+067  $C049  A2 FF       ldx #$ff
+068  $C04B              Delay_Loop                 ;wait a bit
+069  $C04B  CA          dex
+070  $C04C  D0 FD       bne Delay_Loop
+071  $C04E  C6 FC       dec Counter2
+072  $C050  D0 F7       bne Delay_Loop_Start
+073  $C052  C6 FB       dec Counter1
+074  $C054  F0 07       beq Delay_Loop_End
+075  $C056  A2 FF       ldx #$ff
+076  $C058  86 FC       stx Counter2
+077  $C05A  4C 4B C0    jmp Delay_Loop
+078  $C05D              Delay_Loop_End
+079  $C05D              
+080  $C05D  A5 FD       lda Counter3
+081  $C05F  20 75 C0    jsr SPI_Transfer
+082  $C062  20 0A C1    jsr Print_To_Screen
+083  $C065  E6 FD       inc Counter3
+084  $C067  4C 41 C0    jmp Program_Loop
+085  $C06A              
+086  $C06A              
+087  $C06A              ;*********************************
+088  $C06A              ;*Subroutine: Set up User Port B *
+089  $C06A              ;*********************************
+090  $C06A              Setup_PortB
+091  $C06A  A9 86       lda #%10000110
+092  $C06C  8D 01 DD    sta PORT_B_DATA                 ;Port B: Clock high, SS high, Data low
+093  $C06F  A9 07       lda #%00000111                  ;Set Port B direction registers (0=in, 1=out)
+094  $C071  8D 03 DD    sta PORT_B_DDR
+095  $C074  60          rts
+096  $C075              
+097  $C075              ;***************************************
+098  $C075              ;*Subroutine: SPI Transfer / Receive   *
+099  $C075              ;*Params:                              *
+100  $C075              ;*        In: A = Data to transfer out *
+101  $C075              ;*    Return: X = Data received        *
+102  $C075              ;***************************************
+103  $C075              ; Initialize the transfer
+104  $C075              SPI_Transfer
+105  $C075  48          pha                             ;Save data to stack
+106  $C076  A2 00       ldx #$0
+107  $C078  86 F8       stx RX_Buffer                   ;Clear the RX buffer
+108  $C07A  A0 07       ldy #07                         ;Loop counter for 8 bits of data
+109  $C07C  29 01       and #%00000001                  ;Get bit 0 of transmit data
+110  $C07E  09 04       ora #%00000100                  ;Set Clock high, SS Low, Keep data intact
+111  $C080  8D 01 DD    sta PORT_B_DATA                 ;Port B: Clock high, SS Low, Data = Acc A
+112  $C083              Loop_Bits
+113  $C083  29 01       and #%00000001
+114  $C085  8D 01 DD    sta PORT_B_DATA                 ;Port B: Clock low, SS Low, Data = Acc A
+115  $C088  09 04       ora #%00000100
+116  $C08A  8D 01 DD    sta PORT_B_DATA                 ;Port B: Clock high, SS Low, Data = Acc A
+117  $C08D  AD 01 DD    lda PORT_B_DATA                 ;Retreive Data from adapter
+118  $C090  29 80       and #%10000000
+119  $C092  05 F8       ora RX_Buffer
+120  $C094  C0 00       cpy #00
+121  $C096  F0 01       beq Receive_bits_Exit
+122  $C098  4A          lsr a
+123  $C099              Receive_bits_Exit
+124  $C099  85 F8       sta RX_Buffer
+125  $C09B  68          pla                             ;Retrieve data from stack
+126  $C09C  88          dey
+127  $C09D  30 05       bmi SPI_Exit                    ;Exit if done with all 8 bits of data
+128  $C09F  4A          lsr a                           ;Prep for next data bit
+129  $C0A0  48          pha                             ;Save data to stack
+130  $C0A1  4C 83 C0    jmp Loop_Bits
+131  $C0A4              SPI_Exit
+132  $C0A4  A9 06       lda #%000000110
+133  $C0A6  8D 01 DD    sta PORT_B_DATA                 ;Port B: Clock high, SS high, Data low
+134  $C0A9  A6 F8       ldx RX_Buffer
+135  $C0AB  60          rts
+136  $C0AC              
+137  $C0AC              ;********************
+138  $C0AC              ;* Clear the Screen *
+139  $C0AC              ;********************
+140  $C0AC              Clear_Screen
+141  $C0AC  A9 00       lda #$00                        ;Screen and border are black
+142  $C0AE  8D 20 D0    sta $d020
+143  $C0B1  8D 21 D0    sta $d021
+144  $C0B4  AA          tax
+145  $C0B5  A9 20       lda #$20
+146  $C0B7              ;Clear the screen
+147  $C0B7              ClearScreen_loop
+148  $C0B7  9D 00 04    sta $0400,x
+149  $C0BA  9D 00 05    sta $0500,x
+150  $C0BD  9D 00 06    sta $0600,x
+151  $C0C0  9D 00 07    sta $0700,x
+152  $C0C3  CA          dex
+153  $C0C4  D0 F1       bne ClearScreen_loop
+154  $C0C6              ;Set Sprite forground colors to white
+155  $C0C6  A9 01       lda #01                         ;Set Sprite forground colors to white
+156  $C0C8  8D 27 D0    sta $D027                       ;Sprite 0
+157  $C0CB  8D 28 D0    sta $D028                       ;Sprite 1
+158  $C0CE  8D 29 D0    sta $D029                       ;Sprite 2
+159  $C0D1  8D 2A D0    sta $D02a                       ;Sprite 3
+160  $C0D4  60          rts
+161  $C0D5              
+162  $C0D5              
+163  $C0D5              ;**********************
+164  $C0D5              ;* Initialize Sprites *
+165  $C0D5              ;**********************
+166  $C0D5              Initialize_Sprites
+167  $C0D5              ;Set Sprite forground colors to white
+168  $C0D5  A9 01       lda #01                         ;Set Sprite forground colors to white
+169  $C0D7  8D 27 D0    sta $D027                       ;Sprite 0
+170  $C0DA  8D 28 D0    sta $D028                       ;Sprite 1
+171  $C0DD  8D 29 D0    sta $D029                       ;Sprite 2
+172  $C0E0  8D 2A D0    sta $D02a                       ;Sprite 3
+173  $C0E3              ;Copy Sprites to end of screen ram (where they belong)
+174  $C0E3  A2 00       ldx #0
+175  $C0E5              Sprite_Copy_Loop
+176  $C0E5  BD 61 C1    lda Sprite_0,x
+177  $C0E8  9D 00 20    sta $2000,x
+178  $C0EB  E8          inx
+179  $C0EC  D0 F7       bne Sprite_Copy_Loop
+180  $C0EE              ;Set Sprite to center screen and turn on
+181  $C0EE  A9 C8       lda #200
+182  $C0F0  85 63       sta ShipPos_Y
+183  $C0F2  8D 01 D0    sta Sprite_Pos_Base+1
+184  $C0F5  A9 A0       lda #160
+185  $C0F7  85 61       sta ShipPos_X
+186  $C0F9  8D 00 D0    sta Sprite_Pos_Base
+187  $C0FC  A2 00       ldx #0
+188  $C0FE  86 62       stx ShipPos_X_MSB
+189  $C100  8E 10 D0    stx Sprite_Pos_Base+16
+190  $C103  86 64       stx Sprite_State
+191  $C105  E8          inx                             ;Turn on Sprite 0
+192  $C106  8E 15 D0    stx Sprite_Enable
+193  $C109  60          rts
+194  $C10A              
+195  $C10A              
+196  $C10A              ;Character is in X
+197  $C10A              Print_To_Screen
+198  $C10A  8A          txa                             ;Preserve Hex data in X
+199  $C10B  4A          lsr a                           ;We want high nibble (left character)
+200  $C10C  4A          lsr a
+201  $C10D  4A          lsr a
+202  $C10E  4A          lsr a
+203  $C10F  20 54 C1    jsr Hex_To_Screen_Code          ;Get Screen Code
+204  $C112  85 FB       sta Counter1                    ;Save left character
+205  $C114  8A          txa                             ;Retrieve passed in Hex data
+206  $C115  29 0F       and #%00001111                  ;We want lower nibble (right character)
+207  $C117  20 54 C1    jsr Hex_To_Screen_Code          ;Get screen code
+208  $C11A  85 FC       sta Counter2                    ;Save right character
+209  $C11C  A0 00       ldy #0                          ;Reset screen location offset
+210  $C11E  A5 FB       lda Counter1                    ;Get left character
+211  $C120  91 F9       sta (ScreenLSB),y               ;Push it to screen
+212  $C122  C8          iny                             ;Next screen position
+213  $C123  A5 FC       lda Counter2                    ;Get right character
+214  $C125  91 F9       sta (ScreenLSB),y               ;Push it to screen
+215  $C127  C8          iny                             ;Next screen position
+216  $C128  A9 20       lda #32                         ;Get space character
+217  $C12A  91 F9       sta (ScreenLSB),y               ;Push it to screen
+218  $C12C  C8          iny                             ;Next screen position
+219  $C12D  91 F9       sta (ScreenLSB),y               ;Push another space char to screen
+220  $C12F              ;Add 16 bit number to 8 bit constant
+221  $C12F              ;Found this handy bit of code here:
+222  $C12F              ;https://codebase64.org/doku.php?id=base:16bit_addition_and_subtraction
+223  $C12F  18          clc
+224  $C130  A5 F9       lda ScreenLSB                   ;Get screen location memory location
+225  $C132  69 04       adc #04                         ;Move screen pointer 4 positions to the right
+226  $C134  85 F9       sta ScreenLSB
+227  $C136  90 02       bcc Check_Screen_End            ;Check if rolled over 255 ($ff)
+228  $C138  E6 FA       inc ScreenMSB                   ;Yes, add one to screen location memory pointer MSB
+229  $C13A              Check_Screen_End
+230  $C13A  A5 FA       lda ScreenMSB                   ;Get screen location memory pointer MSB
+231  $C13C  C9 07       cmp #$07                        ;Nearing the end of screen memory?
+232  $C13E  D0 0A       bne Print_Screen_Exit           ;No, we're done here
+233  $C140  A5 F9       lda ScreenLSB                   ;Yes, we're near the end of screen memory
+234  $C142  F0 06       beq Print_Screen_Exit           ;Exit if 0 in screen location mem pointer LSB
+235  $C144  A5 F9       lda ScreenLSB
+236  $C146  C9 E8       cmp #$e8                        ;Check if we're at or went over screen memory
+237  $C148  B0 01       bcs Print_Screen_Reset          ;Yes, reset pointer to upper left of screen
+238  $C14A              Print_Screen_Exit
+239  $C14A  60          rts
+240  $C14B              Print_Screen_Reset
+241  $C14B  A9 04       lda #$04                         ;Set screen location memory pointer to top left
+242  $C14D  85 FA       sta ScreenMSB
+243  $C14F  A9 00       lda #$00
+244  $C151  85 F9       sta ScreenLSB
+245  $C153  60          rts
+246  $C154              
+247  $C154              
+248  $C154              ; In: A = Hex number to convert (lower nibble)
+249  $C154              ; Out: A = Screen Code
+250  $C154              Hex_To_Screen_Code
+251  $C154  C9 0A       cmp #10                     ;Check for number
+252  $C156  10 04       bpl Get_Letter
+253  $C158  18          clc                         ;Return number (0-9)
+254  $C159  69 30       adc #48
+255  $C15B  60          rts
+256  $C15C              Get_Letter
+257  $C15C  D8          cld                         ;Return letter (A-F)
+258  $C15D  38          sec
+259  $C15E  E9 09       sbc #9
+260  $C160  60          rts
+261  $C161              
+262  $C161              
+263  $C161              Sprite_0
+264  $C161  00 10 00 00 10 00 00 10  !byte  $00,$10,$00,$00,$10,$00,$00,$10
+265  $C169  00 00 28 00 00 28 00 00  !byte  $00,$00,$28,$00,$00,$28,$00,$00
+266  $C171  28 00 00 44 00 00 44 00  !byte  $28,$00,$00,$44,$00,$00,$44,$00
+267  $C179  00 44 00 00 82 00 00 82  !byte  $00,$44,$00,$00,$82,$00,$00,$82
+268  $C181  00 00 82 00 00 44 00 08  !byte  $00,$00,$82,$00,$00,$44,$00,$08
+269  $C189  28 20 08 10 20 08 28 20  !byte  $28,$20,$08,$10,$20,$08,$28,$20
+270  $C191  08 44 20 08 82 20 09 01  !byte  $08,$44,$20,$08,$82,$20,$09,$01
+271  $C199  20 0E 00 E0 00 00 00 01  !byte  $20,$0e,$00,$e0,$00,$00,$00,$01
+272  $C1A1              
+273  $C1A1              Sprite_1
+274  $C1A1  00 00 00 00 00 00 00 00  !byte  $00,$00,$00,$00,$00,$00,$00,$00
+275  $C1A9  00 7F 00 00 40 00 00 40  !byte  $00,$7f,$00,$00,$40,$00,$00,$40
+276  $C1B1  00 00 20 00 00 10 70 00  !byte  $00,$00,$20,$00,$00,$10,$70,$00
+277  $C1B9  08 8E 00 05 01 C0 02 00  !byte  $08,$8e,$00,$05,$01,$c0,$02,$00
+278  $C1C1  38 05 01 C0 08 8E 00 10  !byte  $38,$05,$01,$c0,$08,$8e,$00,$10
+279  $C1C9  70 00 20 00 00 40 00 00  !byte  $70,$00,$20,$00,$00,$40,$00,$00
+280  $C1D1  40 00 00 7F 00 00 00 00  !byte  $40,$00,$00,$7f,$00,$00,$00,$00
+281  $C1D9  00 00 00 00 00 00 00 01  !byte  $00,$00,$00,$00,$00,$00,$00,$01
+282  $C1E1              
+283  $C1E1              Sprite_2
+284  $C1E1  1C 01 C0 12 02 40 11 04  !byte  $1c,$01,$c0,$12,$02,$40,$11,$04
+285  $C1E9  40 10 88 40 10 50 40 10  !byte  $40,$10,$88,$40,$10,$50,$40,$10
+286  $C1F1  20 40 10 50 40 00 88 00  !byte  $20,$40,$10,$50,$40,$00,$88,$00
+287  $C1F9  01 04 00 01 04 00 01 04  !byte  $01,$04,$00,$01,$04,$00,$01,$04
+288  $C201  00 00 88 00 00 88 00 00  !byte  $00,$00,$88,$00,$00,$88,$00,$00
+289  $C209  88 00 00 50 00 00 50 00  !byte  $88,$00,$00,$50,$00,$00,$50,$00
+290  $C211  00 50 00 00 20 00 00 20  !byte  $00,$50,$00,$00,$20,$00,$00,$20
+291  $C219  00 00 20 00 00 00 00 01  !byte  $00,$00,$20,$00,$00,$00,$00,$01
+292  $C221              
+293  $C221              Sprite_3
+294  $C221  00 00 00 00 00 00 00 00  !byte  $00,$00,$00,$00,$00,$00,$00,$00
+295  $C229  00 00 07 F0 00 00 10 00  !byte  $00,$00,$07,$f0,$00,$00,$10,$00
+296  $C231  00 10 00 00 20 00 70 40  !byte  $00,$10,$00,$00,$20,$00,$70,$40
+297  $C239  03 88 80 1C 05 00 E0 02  !byte  $03,$88,$80,$1c,$05,$00,$e0,$02
+298  $C241  00 1C 05 00 03 88 80 00  !byte  $00,$1c,$05,$00,$03,$88,$80,$00
+299  $C249  70 40 00 00 20 00 00 10  !byte  $70,$40,$00,$00,$20,$00,$00,$10
+300  $C251  00 00 10 00 07 F0 00 00  !byte  $00,$00,$10,$00,$07,$f0,$00,$00
+301  $C259  00 00 00 00 00 00 00 01  !byte  $00,$00,$00,$00,$00,$00,$00,$01
+302  $C261              
+303  $C261              
+304  $C261              
