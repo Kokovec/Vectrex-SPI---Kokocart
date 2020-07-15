@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<AllProjectProperties>
+	<ProjectProperties>
+		<Class>Project</Class>
+		<Name>Vectrex_SPI</Name>
+		<ProjectName>Vectrex_SPI</ProjectName>
+		<DirectoryName></DirectoryName>
+		<Path>..\..\Dan Projects\VectrextoC64\VectoC64</Path>
+		<MainFile>Vectrex_SPI.asm</MainFile>
+		<Description></Description>
+		<Version>1.0</Version>
+		<Author>Kokovec</Author>
+		<Bankswitching>none</Bankswitching>
+		<createBankswitchCode>false</createBankswitchCode>
+		<createGameLoopCode>true</createGameLoopCode>
+		<NumberOfBanks>1</NumberOfBanks>
+		<BankMainFiless>
+			<BankMainFiles>Vectrex_SPI.asm</BankMainFiles>
+		</BankMainFiless>
+		<Extras>0</Extras>
+		<ProjectPreScriptClass></ProjectPreScriptClass>
+		<ProjectPreScriptName></ProjectPreScriptName>
+		<ProjectPostScriptClass></ProjectPostScriptClass>
+		<ProjectPostScriptName></ProjectPostScriptName>
+		<BankDefiness>
+			<BankDefines></BankDefines>
+		</BankDefiness>
+		<WheelName></WheelName>
+	</ProjectProperties>
+</AllProjectProperties>
