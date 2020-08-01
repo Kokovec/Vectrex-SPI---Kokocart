@@ -41,4 +41,12 @@ To run the demo:
 
 Now you should be able to move the Vectrex and C64 joysticks around to control the ships on screen.  
 
-
+Note:
+The KokoKart does have some known bugs and I simply don't have the time to work them out.
+The most notable of which is that Scramble can't get past the player select screen.
+KarlQuappe seems to suffer from the same issue.
+I analyed all of the signals and everyhting seems to be in spec.
+I'm guessing it has something to do with OE clock timing for certain instructions.
+However, the PSOC pins are configured as IN/OUT with output enable.
+There might be synchopy between the OE and IN/OUT enable logic. Who knows.
+Maybe one day I'll look into it further.
