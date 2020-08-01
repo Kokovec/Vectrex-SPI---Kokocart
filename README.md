@@ -48,5 +48,5 @@ KarlQuappe seems to suffer from the same issue.
 I analyed all of the signals and everyhting seems to be in spec.  
 I'm guessing it has something to do with OE clock timing for certain instructions.  
 However, the PSOC pins are configured as IN/OUT with output enable.  
-There might be synchopy between the OE and IN/OUT enable logic. Who knows.  
+There might be synchopy between the OE and IN/OUT enable logic that's causing contention of the data lines. Who knows.  
 Maybe one day I'll look into it further.
