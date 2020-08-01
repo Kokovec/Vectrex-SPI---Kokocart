@@ -41,7 +41,7 @@ To run the demo:
 
 Now you should be able to move the Vectrex and C64 joysticks around to control the ships on screen.  
 
-Note:
+Note:  
 The KokoKart does have some known bugs and I simply don't have the time to work them out.  
 The most notable of which is that Scramble can't get past the player select screen.  
 KarlQuappe seems to suffer from the same issue.  
