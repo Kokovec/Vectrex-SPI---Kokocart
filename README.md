@@ -5,7 +5,7 @@ These files contain the source code and Gerber files required to produce the Vec
 If you build this thing then it is at your own risk. I give absolutely no guarantees with the design or associated code that is found in this repo.  
  
 Within this repo you'll find:
-* PSOC 3 Creator project (microcontroller code)
+* PSOC Creator project (microcontroller code)
 * VIDE project (Vectrex code)
 * C64Studio project (C64 code)
 * Gerber files (PCB)
